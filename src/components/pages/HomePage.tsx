@@ -185,7 +185,7 @@ export default function HomePage() {
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/30 selection:text-secondary">
+    <div className="min-h-screen bg-stone-200 selection:bg-primary/30 selection:text-secondary">
       <Header />
       {/* HERO SECTION */}
       <section
@@ -252,6 +252,9 @@ export default function HomePage() {
 
         <Link to="/shop" className="absolute inset-0 z-5" aria-label="Go to shop" onClick={(e) => e.stopPropagation()} />
       </section>
+
+      {/* BOXED MAIN CONTENT (For large screens) */}
+      <main className="max-w-[1600px] mx-auto bg-background shadow-2xl overflow-hidden">
       {/* CATEGORY MARQUEE */}
       <section className="py-2 md:py-3 2xl:py-4 overflow-hidden border-y border-primary/20 bg-light-gold">
         <div className="flex animate-marquee whitespace-nowrap items-center">
@@ -568,9 +571,10 @@ export default function HomePage() {
                 </Button>
               </form>
             </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
       <Footer />
       {/* WhatsApp Floating Button */}
       <a
