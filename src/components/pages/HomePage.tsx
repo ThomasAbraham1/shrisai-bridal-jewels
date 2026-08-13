@@ -286,14 +286,8 @@ export default function HomePage() {
                 </div>
               ))
             ) : categories.length > 0 ? (
-              categories.map((category, index) => (
-                <motion.div
-                  key={category._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
+              categories.map((category) => (
+                <div key={category._id}>
                   <Link to={`/shop?category=${category.slug}`} className="group block">
                     <div className="p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-1 bg-light-gold">
                       <div className="aspect-square overflow-hidden bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm relative flex items-center justify-center">
@@ -317,7 +311,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))
             ) : null}
           </div>
