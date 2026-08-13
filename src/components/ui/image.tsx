@@ -167,11 +167,20 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
       // Pass standard unoptimized external URLs through a free image optimization proxy (wsrv.nl)
       // This shrinks 2MB+ images down to tiny WebP/AVIF images on the fly!
       let finalSrc = imgSrc;
-      if (!isErrorUrl && imgSrc && (imgSrc.startsWith('http://') || imgSrc.startsWith('https://'))) {
-        // Use the width prop if provided, otherwise default to 1200px (higher resolution)
-        const targetWidth = imageProps.width ? parseInt(imageProps.width.toString(), 10) : 1200;
-        // Added &q=100 for maximum quality WebP compression
-        finalSrc = `https://wsrv.nl/?url=${encodeURIComponent(imgSrc)}&w=${targetWidth}&q=100&output=webp&we`;
+      if (!isErrorUrl && imgSrc) {
+        const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        const isAbsolute = imgSrc.startsWith('http://') || imgSrc.startsWith('https://');
+        const isRelative = imgSrc.startsWith('/') && !imgSrc.startsWith('//');
+        
+        // We can only proxy absolute URLs, or relative URLs if we are NOT on localhost
+        if (isAbsolute || (isRelative && !isLocalhost)) {
+          const absoluteSrc = isRelative ? `${window.location.origin}${imgSrc}` : imgSrc;
+          
+          // Use the width prop if provided, otherwise default to 1200px (higher resolution)
+          const targetWidth = imageProps.width ? parseInt(imageProps.width.toString(), 10) : 1200;
+          // Added &q=100 for maximum quality WebP compression
+          finalSrc = `https://wsrv.nl/?url=${encodeURIComponent(absoluteSrc)}&w=${targetWidth}&q=100&output=webp&we`;
+        }
       }
       
       return <img ref={ref} src={finalSrc} {...imageProps} data-error-image={isErrorUrl} />
