@@ -275,17 +275,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-2 md:gap-4 lg:gap-6 2xl:gap-8">
-            {isLoadingCategories ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={`skeleton-${index}`} className="p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] bg-light-gold animate-pulse">
-                  <div className="aspect-square bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm"></div>
-                  <div className="text-center flex flex-col items-center gap-2">
-                    <div className="h-4 md:h-5 2xl:h-6 w-24 bg-background rounded"></div>
-                    <div className="h-2 md:h-3 2xl:h-3 w-16 bg-background rounded"></div>
-                  </div>
-                </div>
-              ))
-            ) : categories.length > 0 ? (
+            {categories.length > 0 ? (
               categories.map((category) => (
                 <div key={category._id}>
                   <Link to={`/shop?category=${category.slug}`} className="group block">
