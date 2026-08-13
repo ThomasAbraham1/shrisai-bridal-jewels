@@ -171,9 +171,10 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
         const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
         const isAbsolute = imgSrc.startsWith('http://') || imgSrc.startsWith('https://');
         const isRelative = imgSrc.startsWith('/') && !imgSrc.startsWith('//');
+        const isLogo = imgSrc.includes('b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4_mv2.png');
         
         // We can only proxy absolute URLs, or relative URLs if we are NOT on localhost
-        if (isAbsolute || (isRelative && !isLocalhost)) {
+        if (!isLogo && (isAbsolute || (isRelative && !isLocalhost))) {
           const absoluteSrc = isRelative ? `${window.location.origin}${imgSrc}` : imgSrc;
           
           // Use the width prop if provided, otherwise default to 1200px (higher resolution)
