@@ -168,9 +168,10 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
       // This shrinks 2MB+ images down to tiny WebP/AVIF images on the fly!
       let finalSrc = imgSrc;
       if (!isErrorUrl && imgSrc && (imgSrc.startsWith('http://') || imgSrc.startsWith('https://'))) {
-        // Use the width prop if provided, otherwise default to 800px width for reasonable compression
-        const targetWidth = imageProps.width ? parseInt(imageProps.width.toString(), 10) : 800;
-        finalSrc = `https://wsrv.nl/?url=${encodeURIComponent(imgSrc)}&w=${targetWidth}&output=webp&we`;
+        // Use the width prop if provided, otherwise default to 1200px (higher resolution)
+        const targetWidth = imageProps.width ? parseInt(imageProps.width.toString(), 10) : 1200;
+        // Added &q=100 for maximum quality WebP compression
+        finalSrc = `https://wsrv.nl/?url=${encodeURIComponent(imgSrc)}&w=${targetWidth}&q=100&output=webp&we`;
       }
       
       return <img ref={ref} src={finalSrc} {...imageProps} data-error-image={isErrorUrl} />
