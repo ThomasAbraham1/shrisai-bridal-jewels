@@ -275,41 +275,54 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-2 md:gap-4 lg:gap-6 2xl:gap-8">
-            {categories.length > 0 ? (
-              categories.map((category, index) => (
+            {Array.from({ length: isLoadingCategories ? 6 : categories.length }).map((_, index) => {
+              const category = !isLoadingCategories ? categories[index] : null;
+
+              return (
                 <motion.div
-                  key={category._id}
+                  key={`cat-wrapper-${index}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="h-full"
                 >
-                  <Link to={`/shop?category=${category.slug}`} className="group block">
-                    <div className="p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-1 bg-light-gold">
-                      <div className="aspect-square overflow-hidden bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm relative flex items-center justify-center">
-                        {category.categoryImage ? (
-                          <Image
-                            src={category.categoryImage}
-                            alt={category.categoryName || 'Category'}
-                            width={300}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="text-4xl md:text-5xl 2xl:text-6xl text-secondary/30">💍</div>
-                        )}
+                  {category ? (
+                    <Link to={`/shop?category=${category.slug}`} className="group block h-full">
+                      <div className="h-full p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-1 bg-light-gold">
+                        <div className="aspect-square overflow-hidden bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm relative flex items-center justify-center">
+                          {category.categoryImage ? (
+                            <Image
+                              src={category.categoryImage}
+                              alt={category.categoryName || 'Category'}
+                              width={300}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="text-4xl md:text-5xl 2xl:text-6xl text-secondary/30">💍</div>
+                          )}
+                        </div>
+                        <div className="text-center">
+                          <h3 className="font-heading text-sm md:text-lg 2xl:text-xl text-secondary mb-1">{category.categoryName}</h3>
+                          <span className="text-[8px] md:text-[10px] 2xl:text-xs font-paragraph uppercase tracking-widest text-secondary/50 group-hover:text-primary transition-colors flex items-center justify-center gap-1">
+                            Explore Now <ArrowRight className="w-2 md:w-3 2xl:w-4 h-2 md:h-3 2xl:h-4" />
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <h3 className="font-heading text-sm md:text-lg 2xl:text-xl text-secondary mb-1">{category.categoryName}</h3>
-                        <span className="text-[8px] md:text-[10px] 2xl:text-xs font-paragraph uppercase tracking-widest text-secondary/50 group-hover:text-primary transition-colors flex items-center justify-center gap-1">
-                          Explore Now <ArrowRight className="w-2 md:w-3 2xl:w-4 h-2 md:h-3 2xl:h-4" />
-                        </span>
+                    </Link>
+                  ) : (
+                    <div className="h-full p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] bg-light-gold animate-pulse">
+                      <div className="aspect-square bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm"></div>
+                      <div className="text-center flex flex-col items-center gap-2">
+                        <div className="h-4 md:h-5 2xl:h-6 w-24 bg-background rounded"></div>
+                        <div className="h-2 md:h-3 2xl:h-3 w-16 bg-background rounded"></div>
                       </div>
                     </div>
-                  </Link>
+                  )}
                 </motion.div>
-              ))
-            ) : null}
+              );
+            })}
           </div>
         </div>
       </section>
