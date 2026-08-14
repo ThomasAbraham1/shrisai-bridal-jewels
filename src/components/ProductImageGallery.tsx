@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Image } from '@/components/ui/image';
+import { ProductImage } from '@/components/ui/ProductImage';
 
 interface ProductImageGalleryProps {
   mainImage: string;
@@ -149,7 +149,7 @@ export default function ProductImageGallery({
     <div className="w-full space-y-4 product-gallery-wrapper box-border">
       {/* Main Image Container - Mobile Optimized */}
       <div
-        className="relative w-full aspect-square rounded-lg overflow-hidden bg-white shadow-lg group cursor-grab active:cursor-grabbing product-gallery-main box-border select-none mx-auto"
+        className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-white shadow-lg group cursor-grab active:cursor-grabbing product-gallery-main box-border select-none mx-auto"
         style={{
           display: 'flex',
           justifyContent: 'center',
@@ -176,19 +176,11 @@ export default function ProductImageGallery({
               alignItems: 'center'
             }}
           >
-            <Image
+            <ProductImage
               src={allImages[currentImageIndex] || mainImage}
               alt={`${productName} - Image ${currentImageIndex + 1}`}
               width={600}
-              className="object-contain transition-transform duration-300 product-gallery-image"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                display: 'block'
-              }}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 product-gallery-image"
             />
           </motion.div>
         </AnimatePresence>
@@ -243,7 +235,7 @@ export default function ProductImageGallery({
                     : 'border-secondary/10 hover:border-secondary/30'
                 }`}
               >
-                <Image
+                <ProductImage
                   src={image}
                   alt={`${productName} thumbnail ${index + 1}`}
                   width={80}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Image } from '@/components/ui/image';
+import { ProductImage } from '@/components/ui/ProductImage';
 
 interface RentalImageGalleryProps {
   mainImage: string;
@@ -139,7 +139,7 @@ export default function RentalImageGallery({
     <div className="w-full max-w-full space-y-4 rental-gallery-wrapper box-border">
       {/* Main Image Container */}
       <div
-        className="relative w-full aspect-square rounded-lg overflow-hidden bg-white shadow-lg group cursor-grab active:cursor-grabbing rental-gallery-main box-border select-none"
+        className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-white shadow-lg group cursor-grab active:cursor-grabbing rental-gallery-main box-border select-none"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
@@ -155,11 +155,11 @@ export default function RentalImageGallery({
             transition={{ duration: 0.25 }}
             className="w-full h-full"
           >
-            <Image
+            <ProductImage
               src={allImages[currentImageIndex] || mainImage}
               alt={`${productName} - Image ${currentImageIndex + 1}`}
               width={600}
-              className="w-full h-full md:object-cover object-contain transition-transform duration-300 rental-gallery-image"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 rental-gallery-image"
             />
           </motion.div>
         </AnimatePresence>
@@ -214,7 +214,7 @@ export default function RentalImageGallery({
                     : 'border-secondary/10 hover:border-secondary/30'
                 }`}
               >
-                <Image
+                <ProductImage
                   src={image}
                   alt={`${productName} thumbnail ${index + 1}`}
                   width={80}

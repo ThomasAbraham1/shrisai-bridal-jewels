@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { Image } from '@/components/ui/image';
+import { HeroImage } from '@/components/ui/HeroImage';
 import { motion } from 'framer-motion';
 
 interface MobileHeroSliderProps {
@@ -15,19 +15,19 @@ export default function MobileHeroSlider({ onTouchStart, onTouchEnd }: MobileHer
 
   const mobileHeroSlides = useMemo(() => [
     {
-      image: '/media/b9ec8c_161524c29aad4be1a70bacc239fddbd8_mv2.png'
+      image: 'https://static.wixstatic.com/media/b9ec8c_161524c29aad4be1a70bacc239fddbd8~mv2.png'
     },
     {
-      image: '/media/b9ec8c_2b0345575d5b480fae5d0ee3238dfab2_mv2.png'
+      image: 'https://static.wixstatic.com/media/b9ec8c_2b0345575d5b480fae5d0ee3238dfab2~mv2.png'
     },
     {
-      image: '/media/b9ec8c_21d7d416a73b4a218f8cf8208b0c4e78_mv2.png'
+      image: 'https://static.wixstatic.com/media/b9ec8c_21d7d416a73b4a218f8cf8208b0c4e78~mv2.png'
     },
     {
-      image: '/media/b9ec8c_f6e3f8d25792483aaf61e6ae12004982_mv2.png'
+      image: 'https://static.wixstatic.com/media/b9ec8c_f6e3f8d25792483aaf61e6ae12004982~mv2.png'
     },
     {
-      image: '/media/b9ec8c_d1ba9ab1cb3e4f74a6db51105ffaba97_mv2.png'
+      image: 'https://static.wixstatic.com/media/b9ec8c_d1ba9ab1cb3e4f74a6db51105ffaba97~mv2.png'
     }
   ], []);
 
@@ -47,6 +47,13 @@ export default function MobileHeroSlider({ onTouchStart, onTouchEnd }: MobileHer
     onTouchStart?.(e);
   }, [onTouchStart]);
 
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].screenX;
+    handleSwipe();
+    setIsPaused(false);
+    onTouchEnd?.(e);
+  }, [handleSwipe, onTouchEnd]);
+
   const handleSwipe = useCallback(() => {
     const threshold = 50;
     if (touchStartX.current - touchEndX.current > threshold) {
@@ -58,13 +65,6 @@ export default function MobileHeroSlider({ onTouchStart, onTouchEnd }: MobileHer
       setCurrentSlide((prev) => (prev - 1 + mobileHeroSlides.length) % mobileHeroSlides.length);
     }
   }, [mobileHeroSlides.length]);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = e.changedTouches[0].screenX;
-    handleSwipe();
-    setIsPaused(false);
-    onTouchEnd?.(e);
-  }, [handleSwipe, onTouchEnd]);
 
   return (
     <section
@@ -83,7 +83,7 @@ export default function MobileHeroSlider({ onTouchStart, onTouchEnd }: MobileHer
         {/* Slides */}
         {mobileHeroSlides.map((slide, index) => (
           <div key={`mobile-slide-${index}`} className="w-full h-full flex-shrink-0">
-            <Image
+            <HeroImage
               src={slide.image}
               alt={`Mobile Hero Banner ${index + 1}`}
               width={1080}
@@ -94,7 +94,7 @@ export default function MobileHeroSlider({ onTouchStart, onTouchEnd }: MobileHer
         ))}
         {/* Duplicate first slide for seamless loop */}
         <div className="w-full h-full flex-shrink-0">
-          <Image
+          <HeroImage
             src={mobileHeroSlides[0].image}
             alt="Mobile Hero Banner 1 (Loop)"
             width={1080}

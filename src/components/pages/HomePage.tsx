@@ -5,6 +5,8 @@ import VideoShowcase from '@/components/VideoShowcase';
 import ProductCarousel from '@/components/ProductCarousel';
 import { Button } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
+import { HeroImage } from '@/components/ui/HeroImage';
+import { CategoryImage } from '@/components/ui/CategoryImage';
 import { Products, ShopbyCategory } from '@/entities';
 import { BaseCrudService, DEFAULT_CURRENCY, formatPrice, useCurrency } from '@/integrations';
 import { calculateDiscount, getDisplayPrice, hasValidDiscount } from '@/lib/pricing';
@@ -28,20 +30,20 @@ export default function HomePage() {
 
   // Desktop hero slides
   const desktopHeroSlides = useMemo(() => [
-    { image: '/media/b9ec8c_ad402c9d262649c48c12a048372247de_mv2.png' },
-    { image: '/media/b9ec8c_b32ae76fd4cc4c4486515eea848cf1c6_mv2.png' },
-    { image: '/media/b9ec8c_24dca6d054f34101bcf0850bfa8f44bb_mv2.png' },
-    { image: '/media/b9ec8c_20b91092ebf84c75b1eace8a10d8e983_mv2.png' },
-    { image: '/media/b9ec8c_43c97667553d45a090df381177ffca6d_mv2.png' }
+    { image: 'https://static.wixstatic.com/media/b9ec8c_ad402c9d262649c48c12a048372247de~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_b32ae76fd4cc4c4486515eea848cf1c6~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_24dca6d054f34101bcf0850bfa8f44bb~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_20b91092ebf84c75b1eace8a10d8e983~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_43c97667553d45a090df381177ffca6d~mv2.png' }
   ], []);
 
   // Mobile hero slides
   const mobileHeroSlides = useMemo(() => [
-    { image: '/media/b9ec8c_b95d1e4d807d44e6a2982a8b13d115e0_mv2.png' },
-    { image: '/media/b9ec8c_9115d9ae1d3f48279cb6b421d8ea8bf3_mv2.png' },
-    { image: '/media/b9ec8c_efa77560acd54fa299ce70c087d905f8_mv2.png' },
-    { image: '/media/b9ec8c_9ee31a7a6c80453c94c8dcd28470251d_mv2.png' },
-    { image: '/media/b9ec8c_6f72c67b8fa8448ba223c8954b107a61_mv2.png' }
+    { image: 'https://static.wixstatic.com/media/b9ec8c_b95d1e4d807d44e6a2982a8b13d115e0~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_9115d9ae1d3f48279cb6b421d8ea8bf3~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_efa77560acd54fa299ce70c087d905f8~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_9ee31a7a6c80453c94c8dcd28470251d~mv2.png' },
+    { image: 'https://static.wixstatic.com/media/b9ec8c_6f72c67b8fa8448ba223c8954b107a61~mv2.png' }
   ], []);
 
   const heroSlides = isMobile ? mobileHeroSlides : desktopHeroSlides;
@@ -185,7 +187,7 @@ export default function HomePage() {
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-stone-200 selection:bg-primary/30 selection:text-secondary">
+    <div className="min-h-screen bg-background selection:bg-primary/30 selection:text-secondary">
       <Header />
       {/* HERO SECTION */}
       <section
@@ -204,22 +206,22 @@ export default function HomePage() {
         >
           {heroSlides.map((slide, index) => (
             <div key={`slide-${index}`} className="w-full h-full flex-shrink-0">
-              <Image
+              <HeroImage
                 src={slide.image}
                 alt={`Hero Banner ${index + 1}`}
-                width={1920}
-                height={1080}
+                width={1983}
+                height={793}
                 className="w-full h-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
               />
             </div>
           ))}
           <div className="w-full h-full flex-shrink-0">
-            <Image
+            <HeroImage
               src={heroSlides[0].image}
               alt="Hero Banner 1 (Loop)"
-              width={1920}
-              height={1080}
+              width={1983}
+              height={793}
               className="w-full h-full object-cover"
               loading="lazy"
             />
@@ -252,9 +254,6 @@ export default function HomePage() {
 
         <Link to="/shop" className="absolute inset-0 z-5" aria-label="Go to shop" onClick={(e) => e.stopPropagation()} />
       </section>
-
-      {/* BOXED MAIN CONTENT (For large screens) */}
-      <main className="max-w-[1600px] mx-auto bg-background shadow-2xl overflow-hidden">
       {/* CATEGORY MARQUEE */}
       <section className="py-2 md:py-3 2xl:py-4 overflow-hidden border-y border-primary/20 bg-light-gold">
         <div className="flex animate-marquee whitespace-nowrap items-center">
@@ -295,11 +294,10 @@ export default function HomePage() {
                       <div className="h-full p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-1 bg-light-gold">
                         <div className="aspect-square overflow-hidden bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm relative flex items-center justify-center">
                           {category.categoryImage ? (
-                            <Image
+                            <CategoryImage
                               src={category.categoryImage}
                               alt={category.categoryName || 'Category'}
-                              width={300}
-                              className="w-full h-full object-cover"
+                              className="absolute inset-0 w-full h-full object-cover"
                               loading="lazy"
                             />
                           ) : (
@@ -398,12 +396,11 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: index * 0.15 }}
                 >
-                  <Link to={collection.link} className="group block relative overflow-hidden rounded-sm aspect-[4/5]">
-                    <Image
+                  <Link to={collection.link} className="group block relative overflow-hidden rounded-sm aspect-square">
+                    <CategoryImage
                       src={collection.image}
                       alt={collection.name}
-                      width={400}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-dark-background/90 via-dark-background/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
@@ -571,10 +568,9 @@ export default function HomePage() {
                 </Button>
               </form>
             </div>
-            </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
       <Footer />
       {/* WhatsApp Floating Button */}
       <a

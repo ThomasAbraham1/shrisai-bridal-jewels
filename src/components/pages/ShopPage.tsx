@@ -2,7 +2,7 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import ProductSkeleton from '@/components/ProductSkeleton';
 import { Button } from '@/components/ui/button';
-import { Image } from '@/components/ui/image';
+import { ProductImage } from '@/components/ui/ProductImage';
 import { Products, ShopbyCategory } from '@/entities';
 import { BaseCrudService, DEFAULT_CURRENCY, formatPrice, useCart, useCurrency } from '@/integrations';
 import { calculateDiscount, hasValidDiscount } from '@/lib/pricing';
@@ -499,19 +499,12 @@ export default function ShopPage() {
                         }}
                         onClick={() => navigate(`/product/${product._id}`)}
                       >
-                        <Image
+                        <ProductImage
                           src={product.itemImage || '/media/b9ec8c_5984a48894ec46509c2aef0cec485f07_mv2.png'}
                           alt={product.itemName || 'Product'}
+                          fittingType="fill"
                           width={400}
-                          className="object-cover group-hover:scale-110 transition-transform duration-700"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            marginLeft: 'auto',
-                            marginRight: 'auto',
-                            display: 'block'
-                          }}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
 
                         {/* Badges */}

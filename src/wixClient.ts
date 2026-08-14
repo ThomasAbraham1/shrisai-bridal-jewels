@@ -1,6 +1,6 @@
 import { createClient, OAuthStrategy } from '@wix/sdk';
 import { products, collections } from '@wix/stores';
-import { currentCart, checkout } from '@wix/ecom';
+import { currentCart, checkout, orders } from '@wix/ecom';
 import { redirects } from '@wix/redirects';
 import { items } from '@wix/data';
 import { members } from '@wix/members';
@@ -22,6 +22,7 @@ const wixClient = createClient({
     collections,
     currentCart,
     checkout,
+    orders,
     redirects,
     items,
     members,

@@ -16,7 +16,9 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       // Check if user is authenticated by looking for tokens
       if (wixClient.auth.loggedIn()) {
-        const response = await wixClient.members.getCurrentMember();
+        const response = await wixClient.members.getCurrentMember({
+          fieldsets: ['FULL' as any]
+        });
         const currentMember = response.member as unknown as Member;
         
         setMember(currentMember || null);

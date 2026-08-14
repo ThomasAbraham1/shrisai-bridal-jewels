@@ -1,4 +1,4 @@
-import { Image } from '@/components/ui/image';
+import { ProductImage } from '@/components/ui/ProductImage';
 import { Products } from '@/entities';
 import { DEFAULT_CURRENCY, formatPrice, useCart, useCurrency } from '@/integrations';
 import { calculateDiscount, getDisplayPrice, hasValidDiscount } from '@/lib/pricing';
@@ -144,7 +144,7 @@ export default function ProductCarousel({ products, badgeLabel, badgeColor }: Pr
                 </button>
 
                 {/* Product Image */}
-                <Image
+                <ProductImage
                   src={product.itemImage || '/media/978e03_933b74b3e10f4088949a15851f603622_mv2.png'}
                   alt={product.itemName || 'Product'}
                   width={400}

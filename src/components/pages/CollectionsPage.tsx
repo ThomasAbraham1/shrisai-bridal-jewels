@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Image } from '@/components/ui/image';
+import { ProductImage } from '@/components/ui/ProductImage';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
@@ -88,7 +88,7 @@ export default function CollectionsPage() {
                   <div className="relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 mb-4">
                     <div className="aspect-[3/4] overflow-hidden bg-gray-200">
                       {product.itemImage && (
-                        <Image
+                        <ProductImage
                           src={product.itemImage}
                           alt={product.itemName || 'Product'}
                           width={350}

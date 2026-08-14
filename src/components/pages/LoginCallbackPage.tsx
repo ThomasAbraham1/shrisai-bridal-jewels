@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import wixClient from '@/wixClient';
 import { useMember } from '@/integrations';
@@ -7,8 +7,12 @@ export default function LoginCallbackPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { actions } = useMember();
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
     const handleLoginCallback = async () => {
       try {
         // 1. Retrieve the OAuth data we saved before redirecting

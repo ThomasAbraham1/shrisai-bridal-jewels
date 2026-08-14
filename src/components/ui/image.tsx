@@ -4,7 +4,7 @@ import { useSize } from '@/hooks/use-size'
 import './image.css'
 import { cn } from '@/lib/utils';
 
-const FALLBACK_IMAGE_URL = "/media/12d367_4f26ccd17f8f4e3a8958306ea08c2332_mv2.png";
+const FALLBACK_IMAGE_URL = "https://static.wixstatic.com/media/12d367_4f26ccd17f8f4e3a8958306ea08c2332~mv2.png";
 
 type ImageData = {
   id: string
@@ -163,28 +163,7 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
 
     if (!imageData) {
       const isErrorUrl = imgSrc === FALLBACK_IMAGE_URL
-      
-      // Pass standard unoptimized external URLs through a free image optimization proxy (wsrv.nl)
-      // This shrinks 2MB+ images down to tiny WebP/AVIF images on the fly!
-      let finalSrc = imgSrc;
-      if (!isErrorUrl && imgSrc) {
-        const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-        const isAbsolute = imgSrc.startsWith('http://') || imgSrc.startsWith('https://');
-        const isRelative = imgSrc.startsWith('/') && !imgSrc.startsWith('//');
-        const isLogo = imgSrc.includes('b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4_mv2.png');
-        
-        // We can only proxy absolute URLs, or relative URLs if we are NOT on localhost
-        if (!isLogo && (isAbsolute || (isRelative && !isLocalhost))) {
-          const absoluteSrc = isRelative ? `${window.location.origin}${imgSrc}` : imgSrc;
-          
-          // Use the width prop if provided, otherwise default to 1200px (higher resolution)
-          const targetWidth = imageProps.width ? parseInt(imageProps.width.toString(), 10) : 1200;
-          // Added &q=100 for maximum quality WebP compression
-          finalSrc = `https://wsrv.nl/?url=${encodeURIComponent(absoluteSrc)}&w=${targetWidth}&q=100&output=webp&we`;
-        }
-      }
-      
-      return <img ref={ref} src={finalSrc} {...imageProps} data-error-image={isErrorUrl} />
+      return <img ref={ref} src={imgSrc} {...imageProps} data-error-image={isErrorUrl} />
     }
 
     return <WixImage ref={ref} data={imageData} {...imageProps} />

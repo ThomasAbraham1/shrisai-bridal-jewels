@@ -3,7 +3,7 @@ import SearchOverlay from '@/components/SearchOverlay';
 import { Image } from '@/components/ui/image';
 import { useCart, useMember } from '@/integrations';
 import { throttle } from '@/lib/performance';
-import { LogOut, Menu, Search, ShoppingCart, User, X } from 'lucide-react';
+import { LogOut, Menu, Search, ShoppingCart, User, X, Package } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -120,6 +120,13 @@ export default function Header() {
                     >
                       <User className="w-5 h-5 2xl:w-6 2xl:h-6" strokeWidth={2.5} />
                     </Link>
+                    <Link
+                      to="/my-orders"
+                      className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
+                      aria-label="My Orders"
+                    >
+                      <Package className="w-5 h-5 2xl:w-6 2xl:h-6" strokeWidth={2.5} />
+                    </Link>
                     <button
                       onClick={memberActions.logout}
                       className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
@@ -197,6 +204,13 @@ export default function Header() {
                         aria-label="Profile"
                       >
                         <User className="w-5 h-5" strokeWidth={2.5} />
+                      </Link>
+                      <Link
+                        to="/my-orders"
+                        className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
+                        aria-label="My Orders"
+                      >
+                        <Package className="w-5 h-5" strokeWidth={2.5} />
                       </Link>
                       <button
                         onClick={memberActions.logout}

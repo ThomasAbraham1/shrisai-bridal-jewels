@@ -17,6 +17,8 @@ import ShippingReturnsPage from '@/components/pages/ShippingReturnsPage';
 import PrivacyPolicyPage from '@/components/pages/PrivacyPolicyPage';
 import TermsConditionsPage from '@/components/pages/TermsConditionsPage';
 import LoginCallbackPage from '@/components/pages/LoginCallbackPage';
+import ThankYouPage from '@/components/pages/ThankYouPage';
+import MyOrdersPage from '@/components/pages/MyOrdersPage';
 
 function Layout() {
   return (
@@ -143,6 +145,20 @@ const router = createBrowserRouter(
           element: <LoginCallbackPage />,
           handle: {
             pageIdentifier: 'login-callback',
+          },
+        },
+        {
+          path: 'checkout/thank-you',
+          element: <ThankYouPage />,
+          handle: {
+            pageIdentifier: 'thank-you',
+          },
+        },
+        {
+          path: 'my-orders',
+          element: <MyOrdersPage />,
+          handle: {
+            pageIdentifier: 'my-orders',
           },
         },
         {

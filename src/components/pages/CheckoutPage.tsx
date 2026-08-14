@@ -1,17 +1,19 @@
-import { useCart, useCurrency, formatPrice, DEFAULT_CURRENCY } from '@/integrations';
+import { useCart, useCurrency, formatPrice, DEFAULT_CURRENCY, useMember } from '@/integrations';
 import { Button } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import wixClient from '@/wixClient';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { items, totalPrice, isCheckingOut, actions } = useCart();
   const { currency } = useCurrency();
+  const { isAuthenticated, actions: memberActions } = useMember();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -55,18 +57,68 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate form
+    if (!isAuthenticated) {
+      alert('Please log in to complete your checkout');
+      return;
+    }
+
     if (!formData.firstName || !formData.email || !formData.address || !formData.city) {
       alert('Please fill in all required fields');
       return;
     }
     
-    // In a real implementation, this would process the payment
-    // For now, we'll just show a success message and clear the cart
-    alert('Order placed successfully! Thank you for your purchase.');
-    await actions.clearCart();
-    navigate('/');
+    try {
+      await actions.checkout(); // Set isCheckingOut to true in local state
+
+      // Step 1: Clear any existing Wix cart so we start fresh
+      try {
+        await wixClient.currentCart.deleteCurrentCart();
+      } catch (_) {
+        // Ignore if there's no existing cart to delete
+      }
+
+      // Step 2: Add all our local cart items to the Wix-native currentCart
+      // item.itemId is the real Wix Stores product _id (from BaseCrudService mapWixProduct)
+      const lineItemsPayload = items.map(item => ({
+        quantity: item.quantity,
+        catalogReference: {
+          appId: '1380b703-ce81-ff05-f115-39571d94dfcd', // Wix Stores App ID
+          catalogItemId: item.itemId,
+        }
+      }));
+
+      await wixClient.currentCart.addToCurrentCart({ lineItems: lineItemsPayload });
+
+      // Step 3: Create a Wix-hosted checkout session from the current cart
+      const { checkoutId } = await wixClient.currentCart.createCheckoutFromCurrentCart({
+        channelType: wixClient.currentCart.ChannelType.WEB
+      });
+
+      if (!checkoutId) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      // Step 4: Generate the redirect URL to the Wix-hosted payment page (Razorpay)
+      const { redirectSession } = await wixClient.redirects.createRedirectSession({
+        ecomCheckout: { checkoutId },
+        callbacks: {
+          postFlowUrl: window.location.origin + '/checkout/thank-you',
+          cartUrl: window.location.origin + '/cart',
+        }
+      });
+
+      if (redirectSession?.fullUrl) {
+        window.location.href = redirectSession.fullUrl;
+      } else {
+        throw new Error('Failed to generate redirect URL');
+      }
+      
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('There was a problem initiating your checkout. Please try again.');
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,12 +157,33 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl p-8 shadow-lg"
-            >
-              <h2 className="font-heading text-2xl text-foreground mb-6">Shipping Information</h2>
+            {!isAuthenticated ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl p-12 shadow-lg text-center border-t-4 border-primary"
+              >
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Lock className="w-10 h-10 text-primary" />
+                </div>
+                <h2 className="font-heading text-3xl text-foreground mb-4">Secure Checkout</h2>
+                <p className="font-paragraph text-foreground/70 mb-8 max-w-md mx-auto">
+                  To ensure the security of your order and to keep track of your purchases, please log in to your account to continue.
+                </p>
+                <Button 
+                  onClick={() => memberActions.login()}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider px-10 py-6 text-lg rounded-sm"
+                >
+                  Log In to Continue
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl p-8 shadow-lg"
+              >
+                <h2 className="font-heading text-2xl text-foreground mb-6">Shipping Information</h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -235,12 +308,12 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   disabled={isCheckingOut}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider py-3 mt-6"
                 >
-                  {isCheckingOut ? 'Processing...' : 'Place Order'}
+                  {isCheckingOut ? 'Processing...' : 'Proceed to Payment'}
                 </Button>
               </form>
             </motion.div>
+            )}
           </div>
 
           {/* Order Summary */}
