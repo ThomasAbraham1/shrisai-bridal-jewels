@@ -19,7 +19,7 @@ export const HeroImage = forwardRef<HTMLImageElement, HeroImageProps>(
       alt = 'Hero Banner',
       width = 1983,
       height = 793,
-      quality = 85,
+      quality = 95,
       fittingType = 'fill',
       className = 'w-full h-full object-cover',
       loading = 'eager',
@@ -29,12 +29,26 @@ export const HeroImage = forwardRef<HTMLImageElement, HeroImageProps>(
   ) => {
     const rawSrc = src || FALLBACK_HERO;
     const [imgSrc, setImgSrc] = useState<string>(() =>
-      getWixImageUrl(rawSrc, { width, height, mode: fittingType, quality })
+      getWixImageUrl(rawSrc, {
+        width,
+        height,
+        mode: fittingType,
+        quality,
+        unsharpMask: 'usm_0.75_1.20_0.00'
+      })
     );
 
     useEffect(() => {
       const source = src || FALLBACK_HERO;
-      setImgSrc(getWixImageUrl(source, { width, height, mode: fittingType, quality }));
+      setImgSrc(
+        getWixImageUrl(source, {
+          width,
+          height,
+          mode: fittingType,
+          quality,
+          unsharpMask: 'usm_0.75_1.20_0.00'
+        })
+      );
     }, [src, width, height, quality, fittingType]);
 
     return (
