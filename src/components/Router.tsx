@@ -16,6 +16,7 @@ import FAQPage from '@/components/pages/FAQPage';
 import ShippingReturnsPage from '@/components/pages/ShippingReturnsPage';
 import PrivacyPolicyPage from '@/components/pages/PrivacyPolicyPage';
 import TermsConditionsPage from '@/components/pages/TermsConditionsPage';
+import LoginCallbackPage from '@/components/pages/LoginCallbackPage';
 
 function Layout() {
   return (
@@ -135,6 +136,13 @@ const router = createBrowserRouter(
           element: <TermsConditionsPage />,
           handle: {
             pageIdentifier: 'terms-conditions',
+          },
+        },
+        {
+          path: 'login-callback',
+          element: <LoginCallbackPage />,
+          handle: {
+            pageIdentifier: 'login-callback',
           },
         },
         {
