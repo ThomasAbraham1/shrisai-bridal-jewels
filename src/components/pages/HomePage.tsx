@@ -27,6 +27,7 @@ export default function HomePage() {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const { currency } = useCurrency();
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   // Desktop hero slides
   const desktopHeroSlides = useMemo(() => [
@@ -37,23 +38,34 @@ export default function HomePage() {
     { image: 'https://static.wixstatic.com/media/b9ec8c_43c97667553d45a090df381177ffca6d~mv2.png' }
   ], []);
 
-  // Mobile hero slides
+  // We use the tablet hero slides (1086x1448) for mobile as well
   const mobileHeroSlides = useMemo(() => [
-    { image: 'https://static.wixstatic.com/media/b9ec8c_b95d1e4d807d44e6a2982a8b13d115e0~mv2.png' },
-    { image: 'https://static.wixstatic.com/media/b9ec8c_9115d9ae1d3f48279cb6b421d8ea8bf3~mv2.png' },
-    { image: 'https://static.wixstatic.com/media/b9ec8c_efa77560acd54fa299ce70c087d905f8~mv2.png' },
-    { image: 'https://static.wixstatic.com/media/b9ec8c_9ee31a7a6c80453c94c8dcd28470251d~mv2.png' },
-    { image: 'https://static.wixstatic.com/media/b9ec8c_6f72c67b8fa8448ba223c8954b107a61~mv2.png' }
+    { image: '/media/tablet-hero-1.webp' },
+    { image: '/media/tablet-hero-2.webp' },
+    { image: '/media/tablet-hero-3.webp' },
+    { image: '/media/tablet-hero-4.webp' },
+    { image: '/media/tablet-hero-5.webp' }
   ], []);
 
-  const heroSlides = isMobile ? mobileHeroSlides : desktopHeroSlides;
+  // Tablet hero slides
+  const tabletHeroSlides = useMemo(() => [
+    { image: '/media/tablet-hero-1.webp' },
+    { image: '/media/tablet-hero-2.webp' },
+    { image: '/media/tablet-hero-3.webp' },
+    { image: '/media/tablet-hero-4.webp' },
+    { image: '/media/tablet-hero-5.webp' }
+  ], []);
+
+  const heroSlides = (isMobile || isTablet) ? tabletHeroSlides : desktopHeroSlides;
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const checkViewport = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
     };
-    checkMobile();
-    const handleResize = () => checkMobile();
+    checkViewport();
+    const handleResize = () => checkViewport();
     window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -192,7 +204,7 @@ export default function HomePage() {
       {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative w-full h-[45vh] md:h-[75vh] lg:h-[85vh] min-h-[400px] md:min-h-[500px] overflow-hidden flex items-center"
+        className="relative w-full aspect-[1086/1448] lg:aspect-auto lg:h-[85vh] lg:min-h-[500px] overflow-hidden flex items-center bg-black/5"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
@@ -209,9 +221,9 @@ export default function HomePage() {
               <HeroImage
                 src={slide.image}
                 alt={`Hero Banner ${index + 1}`}
-                width={1983}
-                height={793}
-                className="w-full h-full object-cover"
+                width={(isMobile || isTablet) ? 1086 : 1983}
+                height={(isMobile || isTablet) ? 1448 : 793}
+                className={`w-full h-full ${isMobile || isTablet ? 'object-contain' : 'object-cover'}`}
                 loading={index === 0 ? "eager" : "lazy"}
               />
             </div>
@@ -220,9 +232,9 @@ export default function HomePage() {
             <HeroImage
               src={heroSlides[0].image}
               alt="Hero Banner 1 (Loop)"
-              width={1983}
-              height={793}
-              className="w-full h-full object-cover"
+              width={(isMobile || isTablet) ? 1086 : 1983}
+              height={(isMobile || isTablet) ? 1448 : 793}
+              className={`w-full h-full ${isMobile || isTablet ? 'object-contain' : 'object-cover'}`}
               loading="lazy"
             />
           </div>
