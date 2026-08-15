@@ -47,11 +47,19 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     loadAllProducts();
   }, []);
 
-  // Focus input when overlay opens
+  // Focus input when overlay opens and lock body scroll
   useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      setTimeout(() => searchInputRef.current?.focus(), 100);
+    if (isOpen) {
+      if (searchInputRef.current) {
+        setTimeout(() => searchInputRef.current?.focus(), 100);
+      }
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   // Handle search - now includes SKU search
@@ -104,15 +112,16 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 pointer-events-auto"
           />
 
-          {/* Search Overlay */}
+          {/* Search Overlay Panel */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-white shadow-2xl"
+            className="fixed top-0 left-0 right-0 z-50 bg-white shadow-2xl flex flex-col"
+            style={{ maxHeight: '90vh' }}
           >
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-6 md:py-8">
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-6 md:py-8 flex flex-col w-full min-h-0 flex-1">
               {/* Search Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-heading text-lg md:text-2xl text-secondary">Search Products</h2>
@@ -151,7 +160,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               </form>
 
               {/* Results */}
-              <div className="min-h-[200px]">
+              <div className="overflow-y-auto flex-1 min-h-0" style={{ maxHeight: '55vh' }}>
                 {isSearching ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />

@@ -39,6 +39,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@wix/data": "^1.0.506",
     "@wix/ecom": "^1.0.2390",
+    "@wix/forms": "^1.0.496",
     "@wix/members": "^1.0.499",
     "@wix/members-area": "^1.0.31",
     "@wix/redirects": "^1.0.125",

@@ -4,6 +4,7 @@ import { currentCart, checkout, orders } from '@wix/ecom';
 import { redirects } from '@wix/redirects';
 import { items } from '@wix/data';
 import { members } from '@wix/members';
+import { forms, submissions } from '@wix/forms';
 
 // Attempt to load existing tokens from local storage
 let tokens = undefined;
@@ -26,6 +27,8 @@ const wixClient = createClient({
     redirects,
     items,
     members,
+    forms,
+    submissions,
   },
   auth: OAuthStrategy({
     clientId: import.meta.env.VITE_WIX_CLIENT_ID,

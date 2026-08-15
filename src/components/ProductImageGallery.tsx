@@ -180,6 +180,8 @@ export default function ProductImageGallery({
               src={allImages[currentImageIndex] || mainImage}
               alt={`${productName} - Image ${currentImageIndex + 1}`}
               width={600}
+              height={800}
+              fittingType="fit"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 product-gallery-image"
             />
           </motion.div>
@@ -239,6 +241,8 @@ export default function ProductImageGallery({
                   src={image}
                   alt={`${productName} thumbnail ${index + 1}`}
                   width={80}
+                  height={80}
+                  fittingType="fit"
                   className="w-full h-full object-cover"
                 />
               </motion.button>

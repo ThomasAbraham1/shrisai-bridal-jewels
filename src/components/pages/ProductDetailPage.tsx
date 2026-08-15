@@ -89,7 +89,7 @@ export default function ProductDetailPage() {
       const existingItem = items.find(
         item => item.itemId === product._id && item.quantity === quantity
       );
-      
+
       // Only add to cart if it doesn't already exist with the same quantity
       if (!existingItem) {
         await actions.addToCart({
@@ -98,7 +98,7 @@ export default function ProductDetailPage() {
           quantity
         });
       }
-      
+
       // Redirect to checkout
       navigate('/checkout');
     }
@@ -160,14 +160,14 @@ export default function ProductDetailPage() {
       </section>
 
       {/* Product Details */}
-      <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-12 md:py-16 box-border">
-        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 w-full items-start">
+      <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-12 md:py-16 box-border overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-12 w-full items-stretch">
           {/* Product Image Gallery */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="w-full min-w-0"
+            className="w-full lg:w-1/2 min-w-0 flex justify-center"
           >
             <ProductImageGallery
               mainImage={product.itemImage || '/media/978e03_a70be498988c4ccd8be3259a6c64ff17_mv2.png'}
@@ -185,7 +185,7 @@ export default function ProductDetailPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="w-full min-w-0"
+            className="w-full lg:w-1/2 min-w-0"
           >
             {/* Mobile/Tablet: Responsive container matching gallery alignment */}
             <div className="w-full box-border">
@@ -258,11 +258,10 @@ export default function ProductDetailPage() {
 
               {/* 5. Stock Availability */}
               <div className="mb-6 w-full">
-                <div className={`inline-flex items-center px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm font-paragraph ${
-                  isProductAvailable(product.stockQuantity)
+                <div className={`inline-flex items-center px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm font-paragraph ${isProductAvailable(product.stockQuantity)
                     ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
-                }`}>
+                  }`}>
                   {isProductAvailable(product.stockQuantity) ? '✓' : '✗'} {getStockLabel(product.stockQuantity)}
                 </div>
               </div>
@@ -291,9 +290,10 @@ export default function ProductDetailPage() {
               {product.itemDescription && (
                 <div className="mb-8 w-full">
                   <h3 className="font-heading text-lg text-secondary mb-3">Description</h3>
-                  <p className="text-foreground/80 font-paragraph leading-relaxed break-words">
-                    {product.itemDescription}
-                  </p>
+                  <div
+                    className="text-foreground/80 font-paragraph leading-relaxed break-words prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: product.itemDescription }}
+                  />
                 </div>
               )}
 
@@ -301,9 +301,10 @@ export default function ProductDetailPage() {
               {product.specifications && (
                 <div className="mb-8 w-full">
                   <h3 className="font-heading text-lg text-secondary mb-3">Specifications</h3>
-                  <p className="text-foreground/80 font-paragraph leading-relaxed break-words">
-                    {product.specifications}
-                  </p>
+                  <div
+                    className="text-foreground/80 font-paragraph leading-relaxed break-words prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: product.specifications }}
+                  />
                 </div>
               )}
 
@@ -355,14 +356,14 @@ export default function ProductDetailPage() {
                     />
                   </div>
                 </Link>
-                
+
                 <div className="space-y-3 w-full min-w-0">
                   <Link to={`/product/${relatedProduct._id}`} className="block w-full min-w-0">
                     <h3 className="font-heading text-base md:text-lg text-foreground hover:text-primary transition-colors line-clamp-2 break-words">
                       {relatedProduct.itemName}
                     </h3>
                   </Link>
-                  
+
                   <div className="flex items-baseline gap-2 md:gap-3 flex-wrap w-full">
                     {relatedProduct.enableDiscount && relatedProduct.mrp && relatedProduct.ourPrice ? (
                       <>
@@ -381,9 +382,9 @@ export default function ProductDetailPage() {
                   </div>
 
                   <Button
-                    onClick={() => actions.addToCart({ 
-                      collectionId: 'jewelleryproducts', 
-                      itemId: relatedProduct._id 
+                    onClick={() => actions.addToCart({
+                      collectionId: 'jewelleryproducts',
+                      itemId: relatedProduct._id
                     })}
                     disabled={!isProductAvailable(relatedProduct.stockQuantity) || addingItemId === relatedProduct._id}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs md:text-sm"

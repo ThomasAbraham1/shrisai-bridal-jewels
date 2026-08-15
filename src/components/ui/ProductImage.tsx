@@ -29,13 +29,13 @@ export const ProductImage = forwardRef<HTMLImageElement, ProductImageProps>(
   ) => {
     const rawSrc = src || FALLBACK_PRODUCT_IMAGE;
     const [imgSrc, setImgSrc] = useState<string>(() =>
-      getWixImageUrl(rawSrc, { width: 452, height: 603, mode: 'fill', quality: 80 })
+      getWixImageUrl(rawSrc, { width, height, mode: fittingType, quality })
     );
 
     useEffect(() => {
       const source = src || FALLBACK_PRODUCT_IMAGE;
-      setImgSrc(getWixImageUrl(source, { width: 452, height: 603, mode: 'fill', quality: 80 }));
-    }, [src]);
+      setImgSrc(getWixImageUrl(source, { width, height, mode: fittingType, quality }));
+    }, [src, width, height, fittingType, quality]);
 
     return (
       <img

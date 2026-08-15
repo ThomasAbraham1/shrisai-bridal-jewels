@@ -3,6 +3,7 @@ import SearchOverlay from '@/components/SearchOverlay';
 import { Image } from '@/components/ui/image';
 import { useCart, useMember } from '@/integrations';
 import { throttle } from '@/lib/performance';
+import { getWixImageUrl } from '@/lib/wixMedia';
 import { LogOut, Menu, Search, ShoppingCart, User, X, Package } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -38,7 +39,7 @@ export default function Header() {
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'image';
-    link.href = '/media/b9ec8c_805f029d74134362b24c2fa79b957c41_mv2.png';
+    link.href = getWixImageUrl("https://static.wixstatic.com/media/b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4~mv2.png", { width: 180, height: 180, quality: 95, mode: 'fit' });
     link.crossOrigin = 'anonymous';
     document.head.appendChild(link);
   }, []);
@@ -75,13 +76,12 @@ export default function Header() {
             <div className="flex items-center justify-between h-[72px] md:h-[80px] lg:h-[80px] 2xl:h-[90px] px-0 lg:px-12 2xl:px-16 gap-0 lg:gap-6 2xl:gap-6 bg-secondary">
               {/* Desktop: Left Logo */}
               <Link to="/" className="hidden lg:flex items-center flex-shrink-0 min-w-0 bg-transparent overflow-visible">
-                <Image
-                  src="/media/b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4_mv2.png"
+                <img
+                  src={getWixImageUrl("https://static.wixstatic.com/media/b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4~mv2.png", { width: 180, height: 180, quality: 95, mode: 'fit' })}
                   width={60}
                   height={60}
+                  alt="Shrisai Bridal Jewels"
                   className="h-[65px] 2xl:h-[75px] w-auto object-contain"
-                  originWidth={1536}
-                  originHeight={1024}
                   loading="eager"
                   decoding="async"
                   style={{ background: 'transparent' }} />
@@ -173,20 +173,19 @@ export default function Header() {
 
                 {/* Center Zone: Logo (Perfectly Centered) */}
                 <Link to="/" className="flex items-center justify-center flex-1 bg-transparent overflow-visible">
-                  <Image
-                    src="/media/b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4_mv2.png"
+                  <img
+                    src={getWixImageUrl("https://static.wixstatic.com/media/b9ec8c_552fc58a4aae4f2bb532e58a2f28afb4~mv2.png", { width: 180, height: 180, quality: 95, mode: 'fit' })}
                     width={60}
                     height={60}
+                    alt="Shrisai Bridal Jewels"
                     className="h-[40px] md:h-[48px] w-auto object-contain"
-                    originWidth={1536}
-                    originHeight={1024}
                     loading="eager"
                     decoding="async"
                     style={{ background: 'transparent' }} />
                 </Link>
 
                 {/* Right Zone: Action Icons */}
-                <div className="flex items-center justify-end w-20 pr-5 gap-4">
+                <div className="flex items-center justify-end w-24 pr-5 gap-3">
                   <button
                     onClick={() => setIsSearchOpen(true)}
                     className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
@@ -194,41 +193,6 @@ export default function Header() {
                   >
                     <Search className="w-5 h-5" strokeWidth={2.5} />
                   </button>
-                  {isLoading ? (
-                    <div className="w-5 h-5" />
-                  ) : isAuthenticated ? (
-                    <>
-                      <Link
-                        to="/profile"
-                        className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
-                        aria-label="Profile"
-                      >
-                        <User className="w-5 h-5" strokeWidth={2.5} />
-                      </Link>
-                      <Link
-                        to="/my-orders"
-                        className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
-                        aria-label="My Orders"
-                      >
-                        <Package className="w-5 h-5" strokeWidth={2.5} />
-                      </Link>
-                      <button
-                        onClick={memberActions.logout}
-                        className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
-                        aria-label="Sign out"
-                      >
-                        <LogOut className="w-5 h-5" strokeWidth={2.5} />
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={memberActions.login}
-                      className="p-1 hover:text-light-gold transition-colors text-primary-foreground"
-                      aria-label="Sign in"
-                    >
-                      <User className="w-5 h-5" strokeWidth={2.5} />
-                    </button>
-                  )}
                   <button
                     onClick={actions.toggleCart}
                     className="relative p-1 hover:text-light-gold transition-colors text-primary-foreground"
@@ -259,6 +223,47 @@ export default function Header() {
                       {link.name}
                     </Link>
                   ))}
+                  
+                  {/* Mobile User Actions */}
+                  <div className="h-px bg-secondary/10 my-2 w-full" />
+                  
+                  {!isLoading && isAuthenticated ? (
+                    <>
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 font-paragraph text-secondary hover:text-primary transition-colors uppercase text-xs tracking-wider py-2"
+                      >
+                        <User className="w-4 h-4" /> My Profile
+                      </Link>
+                      <Link
+                        to="/my-orders"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 font-paragraph text-secondary hover:text-primary transition-colors uppercase text-xs tracking-wider py-2"
+                      >
+                        <Package className="w-4 h-4" /> My Orders
+                      </Link>
+                      <button
+                        onClick={() => {
+                          memberActions.logout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-3 font-paragraph text-secondary hover:text-primary transition-colors uppercase text-xs tracking-wider py-2 text-left"
+                      >
+                        <LogOut className="w-4 h-4" /> Sign Out
+                      </button>
+                    </>
+                  ) : !isLoading && !isAuthenticated ? (
+                    <button
+                      onClick={() => {
+                        memberActions.login();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 font-paragraph text-secondary hover:text-primary transition-colors uppercase text-xs tracking-wider py-2 text-left"
+                    >
+                      <User className="w-4 h-4" /> Sign In
+                    </button>
+                  ) : null}
                 </div>
               </div>
             )}

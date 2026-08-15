@@ -1,13 +1,35 @@
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { ContactInquiries } from '@/entities';
 import { BaseCrudService } from '@/integrations';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Mail, MapPin, MessageCircle, Phone, Send, X } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
+import wixClient from '@/wixClient';
+
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳', name: 'India' },
+  { code: '+1', flag: '🇺🇸', name: 'USA/Canada' },
+  { code: '+44', flag: '🇬🇧', name: 'UK' },
+  { code: '+61', flag: '🇦🇺', name: 'Australia' },
+  { code: '+971', flag: '🇦🇪', name: 'UAE' },
+  { code: '+966', flag: '🇸🇦', name: 'Saudi Arabia' },
+  { code: '+65', flag: '🇸🇬', name: 'Singapore' },
+  { code: '+60', flag: '🇲🇾', name: 'Malaysia' },
+  { code: '+974', flag: '🇶🇦', name: 'Qatar' },
+  { code: '+973', flag: '🇧🇭', name: 'Bahrain' },
+  { code: '+968', flag: '🇴🇲', name: 'Oman' },
+  { code: '+965', flag: '🇰🇼', name: 'Kuwait' },
+  { code: '+64', flag: '🇳🇿', name: 'New Zealand' },
+  { code: '+49', flag: '🇩🇪', name: 'Germany' },
+  { code: '+33', flag: '🇫🇷', name: 'France' },
+  { code: '+81', flag: '🇯🇵', name: 'Japan' },
+  { code: '+82', flag: '🇰🇷', name: 'South Korea' },
+  { code: '+86', flag: '🇨🇳', name: 'China' },
+];
 
 export default function ContactPage() {
+  const [countryCode, setCountryCode] = useState('+91');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,14 +44,28 @@ export default function ContactPage() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const inquiry: ContactInquiries = {
-      _id: crypto.randomUUID(),
-      ...formData
-    };
-
     setIsSubmitting(true);
     try {
-      await BaseCrudService.create('contactinquiries', inquiry);
+      const inquiryTypeLabels: Record<string, string> = {
+        'general': 'General Inquiry',
+        'purchase': 'Purchase Inquiry',
+        'rental': 'Rental Inquiry',
+        'appointment': 'Book Appointment',
+        'custom': 'Custom Design',
+      };
+
+      await wixClient.submissions.createSubmission({
+        formId: 'bcef0512-f1c0-4642-bd62-9854e78efc40',
+        submissions: {
+          full_name: formData.name,
+          email_address: formData.email,
+          phone_number: formData.phone.trim().startsWith('+') 
+            ? '+' + formData.phone.replace(/\D/g, '') 
+            : countryCode + formData.phone.replace(/\D/g, ''),
+          inquiry_type: inquiryTypeLabels[formData.inquiryType] ?? formData.inquiryType,
+          message: formData.message
+        }
+      });
       setSubmitSuccess(true);
 
       // Scroll success message into view
@@ -181,16 +217,30 @@ export default function ContactPage() {
                   <label htmlFor="phone" className="block font-paragraph font-semibold text-foreground mb-0.5 text-xs md:text-sm">
                     Phone Number *
                   </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-foreground/20 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 font-paragraph text-xs md:text-sm"
-                    placeholder="Phone number"
-                  />
+                  <div className="flex rounded-lg border border-foreground/20 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 overflow-hidden">
+                    <select
+                      id="countryCode"
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="bg-foreground/5 border-r border-foreground/20 px-1 md:px-2 py-1.5 md:py-2 font-paragraph text-xs md:text-sm focus:outline-none cursor-pointer flex-shrink-0"
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.flag} {c.code}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="flex-1 min-w-0 px-2 md:px-3 py-1.5 md:py-2 font-paragraph text-xs md:text-sm focus:outline-none bg-transparent"
+                      placeholder="Phone number"
+                    />
+                  </div>
                 </div>
 
                 <div>

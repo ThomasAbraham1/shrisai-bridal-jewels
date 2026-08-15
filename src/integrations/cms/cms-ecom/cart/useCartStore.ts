@@ -89,7 +89,14 @@ export const useCartStore = create<CartStore>()(
 
               if (collectionId === 'jewelleryproducts') {
                 productName = product?.itemName || 'Product';
-                productPrice = product?.itemPrice || product?.ourPrice || 0;
+                
+                // Use discounted price if applicable, otherwise fallback to itemPrice or ourPrice
+                if (product?.enableDiscount && product?.mrp && product?.ourPrice) {
+                  productPrice = product.ourPrice;
+                } else {
+                  productPrice = product?.itemPrice || product?.ourPrice || 0;
+                }
+                
                 productImage = product?.itemImage;
               } else if (collectionId === 'rentalproducts') {
                 productName = product?.name || 'Product';
