@@ -107,7 +107,8 @@ export default function HomePage() {
         const result = await wixClient.categories.queryCategories({
           treeReference: { appNamespace: '@wix/stores' }
         }).eq('visible', true).find();
-        setCategoriesList(result.items);
+        const sortedItems = [...result.items].sort((a, b) => (a.parentCategory?.index ?? 0) - (b.parentCategory?.index ?? 0));
+        setCategoriesList(sortedItems);
       } catch (error) {
         console.error('Error fetching categories from Wix Stores:', error);
         setCategoriesList([]);
