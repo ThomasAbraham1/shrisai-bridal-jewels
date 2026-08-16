@@ -144,7 +144,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by product name, SKU, category, or description..."
-                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-background border border-secondary/10 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 font-paragraph text-sm md:text-base transition-all"
+                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-background border border-secondary/10 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 font-paragraph text-base md:text-lg transition-all"
                   />
                   {searchQuery && (
                     <button

@@ -93,12 +93,28 @@ function MyOrdersContent() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider rounded-full">
                       {order.status || 'Processing'}
                     </span>
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wider rounded-full">
-                      {order.paymentStatus || 'Paid'}
+                    <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full ${
+                      (order.paymentStatus || '').toUpperCase() === 'PAID'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {order.paymentStatus === 'PAID' ? 'Paid' : order.paymentStatus === 'NOT_PAID' ? 'Not Paid' : (order.paymentStatus || 'Paid')}
+                    </span>
+                    <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full ${
+                      (order.fulfillmentStatus || '').toUpperCase() === 'FULFILLED'
+                        ? 'bg-green-100 text-green-700'
+                        : (order.fulfillmentStatus || '').toUpperCase() === 'PARTIALLY_FULFILLED'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-orange-100 text-orange-700'
+                    }`}>
+                      {order.fulfillmentStatus === 'FULFILLED' ? 'Fulfilled'
+                        : order.fulfillmentStatus === 'PARTIALLY_FULFILLED' ? 'Partial'
+                        : order.fulfillmentStatus === 'NOT_FULFILLED' ? 'Unfulfilled'
+                        : (order.fulfillmentStatus || 'Unfulfilled')}
                     </span>
                   </div>
                 </div>

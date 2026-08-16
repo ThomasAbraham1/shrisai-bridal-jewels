@@ -78,7 +78,7 @@ export default function Footer() {
                 <MessageCircle className="w-4 md:w-5 2xl:w-6 h-4 md:h-5 2xl:h-6" />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@Shrisai_bridaljewels"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 md:w-10 2xl:w-12 h-9 md:h-10 2xl:h-12 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-all hover:scale-110"

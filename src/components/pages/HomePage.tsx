@@ -7,8 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
 import { HeroImage } from '@/components/ui/HeroImage';
 import { CategoryImage } from '@/components/ui/CategoryImage';
-import { Products, ShopbyCategory } from '@/entities';
+import CategoryCarouselRow from '@/components/CategoryCarouselRow';
+import { Products } from '@/entities';
+import { categories } from '@wix/categories';
 import { BaseCrudService, DEFAULT_CURRENCY, formatPrice, useCurrency } from '@/integrations';
+import wixClient from '@/wixClient';
 import { calculateDiscount, getDisplayPrice, hasValidDiscount } from '@/lib/pricing';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight, Clock, MapPin, Phone, Star } from 'lucide-react';
@@ -23,7 +26,7 @@ export default function HomePage() {
   const [isLoadingBestSellers, setIsLoadingBestSellers] = useState(true);
   const [newArrivalProducts, setNewArrivalProducts] = useState<Products[]>([]);
   const [isLoadingNewArrivals, setIsLoadingNewArrivals] = useState(true);
-  const [categories, setCategories] = useState<ShopbyCategory[]>([]);
+  const [categoriesList, setCategoriesList] = useState<categories.Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const { currency } = useCurrency();
   const [isMobile, setIsMobile] = useState(false);
@@ -56,7 +59,7 @@ export default function HomePage() {
     { image: '/media/tablet-hero-5.webp' }
   ], []);
 
-  const heroSlides = (isMobile || isTablet) ? tabletHeroSlides : desktopHeroSlides;
+  const heroSlides = isMobile ? mobileHeroSlides : desktopHeroSlides;
 
   useEffect(() => {
     const checkViewport = () => {
@@ -101,12 +104,13 @@ export default function HomePage() {
 
     const fetchCategories = async () => {
       try {
-        const categoriesResult = await BaseCrudService.getAll<ShopbyCategory>('jewellerycategories', {}, { limit: 50 });
-        const sortedCategories = categoriesResult.items.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-        setCategories(sortedCategories);
+        const result = await wixClient.categories.queryCategories({
+          treeReference: { appNamespace: '@wix/stores' }
+        }).eq('visible', true).find();
+        setCategoriesList(result.items);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        setCategories([]);
+        console.error('Error fetching categories from Wix Stores:', error);
+        setCategoriesList([]);
       } finally {
         setIsLoadingCategories(false);
       }
@@ -199,13 +203,17 @@ export default function HomePage() {
   const heroY = useTransform(heroScroll, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0]);
 
+  const midPoint = Math.ceil(categoriesList.length / 2);
+  const row1Categories = categoriesList.slice(0, midPoint);
+  const row2Categories = categoriesList.slice(midPoint);
+
   return (
     <div className="min-h-screen bg-background selection:bg-primary/30 selection:text-secondary">
       <Header />
       {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative w-full aspect-[1086/1448] lg:aspect-auto lg:h-[85vh] lg:min-h-[500px] overflow-hidden flex items-center bg-black/5"
+        className="relative w-full aspect-[1086/1448] md:aspect-[1983/793] lg:aspect-auto lg:h-[85vh] lg:min-h-[500px] overflow-hidden flex items-center bg-black/5"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
@@ -222,9 +230,9 @@ export default function HomePage() {
               <HeroImage
                 src={slide.image}
                 alt={`Hero Banner ${index + 1}`}
-                width={(isMobile || isTablet) ? 1086 : 1983}
-                height={(isMobile || isTablet) ? 1448 : 793}
-                className={`w-full h-full ${isMobile || isTablet ? 'object-contain' : 'object-cover'}`}
+                width={isMobile ? 1086 : 1983}
+                height={isMobile ? 1448 : 793}
+                className="w-full h-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
               />
             </div>
@@ -233,9 +241,9 @@ export default function HomePage() {
             <HeroImage
               src={heroSlides[0].image}
               alt="Hero Banner 1 (Loop)"
-              width={(isMobile || isTablet) ? 1086 : 1983}
-              height={(isMobile || isTablet) ? 1448 : 793}
-              className={`w-full h-full ${isMobile || isTablet ? 'object-contain' : 'object-cover'}`}
+              width={isMobile ? 1086 : 1983}
+              height={isMobile ? 1448 : 793}
+              className="w-full h-full object-cover"
               loading="lazy"
             />
           </div>
@@ -289,54 +297,32 @@ export default function HomePage() {
             <div className="w-12 2xl:w-16 h-[1px] mx-auto mt-3 md:mt-6 2xl:mt-8 bg-secondary"></div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-2 md:gap-4 lg:gap-6 2xl:gap-8">
-            {Array.from({ length: isLoadingCategories ? 6 : categories.length }).map((_, index) => {
-              const category = !isLoadingCategories ? categories[index] : null;
-
-              return (
-                <motion.div
-                  key={`cat-wrapper-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="h-full"
-                >
-                  {category ? (
-                    <Link to={`/shop?category=${category.slug}`} className="group block h-full">
-                      <div className="h-full p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-1 bg-light-gold">
-                        <div className="aspect-square overflow-hidden bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm relative flex items-center justify-center">
-                          {category.categoryImage ? (
-                            <CategoryImage
-                              src={category.categoryImage}
-                              alt={category.categoryName || 'Category'}
-                              className="absolute inset-0 w-full h-full object-cover"
-                              loading="eager"
-                            />
-                          ) : (
-                            <div className="text-4xl md:text-5xl 2xl:text-6xl text-secondary/30">💍</div>
-                          )}
-                        </div>
-                        <div className="text-center">
-                          <h3 className="font-heading text-sm md:text-lg 2xl:text-xl text-secondary mb-1">{category.categoryName}</h3>
-                          <span className="text-[8px] md:text-[10px] 2xl:text-xs font-paragraph uppercase tracking-widest text-secondary/50 group-hover:text-primary transition-colors flex items-center justify-center gap-1">
-                            Explore Now <ArrowRight className="w-2 md:w-3 2xl:w-4 h-2 md:h-3 2xl:h-4" />
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ) : (
-                    <div className="h-full p-2 md:p-4 2xl:p-6 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] bg-light-gold animate-pulse">
-                      <div className="aspect-square bg-background mb-2 md:mb-4 2xl:mb-6 rounded-sm"></div>
-                      <div className="text-center flex flex-col items-center gap-2">
-                        <div className="h-4 md:h-5 2xl:h-6 w-24 bg-background rounded"></div>
-                        <div className="h-2 md:h-3 2xl:h-3 w-16 bg-background rounded"></div>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
+          <div className="flex flex-col gap-4">
+            {isMobile || isTablet ? (
+              <>
+                <CategoryCarouselRow 
+                  categoriesList={row1Categories} 
+                  isLoading={isLoadingCategories} 
+                  isMobile={isMobile} 
+                  isTablet={isTablet} 
+                />
+                {row2Categories.length > 0 && (
+                  <CategoryCarouselRow 
+                    categoriesList={row2Categories} 
+                    isLoading={isLoadingCategories} 
+                    isMobile={isMobile} 
+                    isTablet={isTablet} 
+                  />
+                )}
+              </>
+            ) : (
+              <CategoryCarouselRow 
+                categoriesList={categoriesList} 
+                isLoading={isLoadingCategories} 
+                isMobile={isMobile} 
+                isTablet={isTablet} 
+              />
+            )}
           </div>
         </div>
       </section>

@@ -37,6 +37,7 @@
     "@radix-ui/react-tooltip": "^1.2.16",
     "@react-hook/resize-observer": "^2.0.2",
     "@tailwindcss/vite": "^4.3.3",
+    "@wix/categories": "^1.0.214",
     "@wix/data": "^1.0.506",
     "@wix/ecom": "^1.0.2390",
     "@wix/forms": "^1.0.496",

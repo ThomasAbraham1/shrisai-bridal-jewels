@@ -3,8 +3,10 @@ import Header from '@/components/Header';
 import ProductSkeleton from '@/components/ProductSkeleton';
 import { Button } from '@/components/ui/button';
 import { ProductImage } from '@/components/ui/ProductImage';
-import { Products, ShopbyCategory } from '@/entities';
+import { Products } from '@/entities';
+import { categories } from '@wix/categories';
 import { BaseCrudService, DEFAULT_CURRENCY, formatPrice, useCart, useCurrency } from '@/integrations';
+import wixClient from '@/wixClient';
 import { calculateDiscount, hasValidDiscount } from '@/lib/pricing';
 import { motion } from 'framer-motion';
 import { Eye, ShoppingCart, SlidersHorizontal, X } from 'lucide-react';
@@ -20,7 +22,7 @@ export default function ShopPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [skip, setSkip] = useState(0);
   const [hasNext, setHasNext] = useState(false);
-  const [categories, setCategories] = useState<ShopbyCategory[]>([]);
+  const [categoriesList, setCategoriesList] = useState<categories.Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isCategoryReady, setIsCategoryReady] = useState(false);
   const { addingItemId, actions } = useCart();
@@ -28,22 +30,24 @@ export default function ShopPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Load categories from CMS - optimized with limit
+  // Load categories from Wix Stores
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setIsLoadingCategories(true);
-        const result = await BaseCrudService.getAll<ShopbyCategory>('jewellerycategories', {}, { limit: 50 });
-        setCategories(result.items);
+        const result = await wixClient.categories.queryCategories({
+          treeReference: { appNamespace: '@wix/stores' }
+        }).eq('visible', true).find();
+        
+        setCategoriesList(result.items);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        setCategories([]);
+        console.error('Error fetching categories from Wix Stores:', error);
+        setCategoriesList([]);
       } finally {
         setIsLoadingCategories(false);
       }
     };
 
-    // Fetch directly, no cache needed as the backend handles it optimally
     fetchCategories();
   }, []);
 
@@ -54,10 +58,10 @@ export default function ShopPage() {
       const paramLower = categoryParam.toLowerCase().trim();
       
       // If categories are loaded, try to find matching category
-      if (categories.length > 0) {
-        const matchedCategory = categories.find(c =>
+      if (categoriesList.length > 0) {
+        const matchedCategory = categoriesList.find(c =>
           c.slug?.toLowerCase().trim() === paramLower ||
-          c.categoryName?.toLowerCase().trim() === paramLower
+          c.name?.toLowerCase().trim() === paramLower
         );
 
         // If found, use the slug; otherwise use the param as-is
@@ -82,7 +86,7 @@ export default function ShopPage() {
       // Search will be applied in loadProducts
       setSkip(0);
     }
-  }, [searchParams, categories]);
+  }, [searchParams, categoriesList]);
 
   const priceRanges = useMemo(() => [
     { value: 'all', label: 'All Prices' },
@@ -140,16 +144,17 @@ export default function ShopPage() {
 
       // Filter by category - match against category field in products (case-insensitive, trimmed)
       if (selectedCategory !== 'all') {
-        // Try to match by slug first, then by category name
-        let categoryNameToMatch = null;
-
-        // Check if selectedCategory matches a slug
-        const selectedCat = categories.find(c => c.slug?.toLowerCase().trim() === selectedCategory);
-        if (selectedCat && selectedCat.categoryName) {
-          categoryNameToMatch = selectedCat.categoryName.toLowerCase().trim();
+        let categoryNameToMatch;
+        const selectedCat = categoriesList.find(c => c.slug?.toLowerCase().trim() === selectedCategory);
+        if (selectedCat && selectedCat.name) {
+          categoryNameToMatch = selectedCat.name.toLowerCase().trim();
         } else {
-          // If no slug match, use the selectedCategory directly as the category name
-          categoryNameToMatch = selectedCategory.toLowerCase().trim();
+          const matchedByName = categoriesList.find(c => c.name?.toLowerCase().trim() === selectedCategory.toLowerCase().trim());
+          if (matchedByName && matchedByName.name) {
+            categoryNameToMatch = matchedByName.name.toLowerCase().trim();
+          } else {
+            categoryNameToMatch = selectedCategory.toLowerCase().trim();
+          }
         }
 
         if (categoryNameToMatch) {
@@ -198,7 +203,7 @@ export default function ShopPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [skip, searchParams, selectedCategory, priceRange, categories, sortBy]);
+  }, [skip, searchParams, selectedCategory, priceRange, categoriesList, sortBy]);
 
   const applySorting = useCallback((items: Products[], sort: string): Products[] => {
     const sorted = [...items];
@@ -295,20 +300,20 @@ export default function ShopPage() {
                       />
                       <span className="font-paragraph text-sm 2xl:text-base text-foreground/80 group-hover:text-primary transition-colors">All Products</span>
                     </label>
-                    {!isLoadingCategories && categories.map((cat) => (
+                    {!isLoadingCategories && categoriesList.map((cat) => (
                       <label key={cat._id} className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="radio"
                           name="category"
-                          value={cat.slug}
-                          checked={selectedCategory === cat.slug}
+                          value={cat.slug || cat.name || ''}
+                          checked={selectedCategory === (cat.slug || cat.name)?.toLowerCase().trim()}
                           onChange={(e) => {
                             setSelectedCategory(e.target.value);
                             setSkip(0);
                           }}
-                          className="w-4 h-4 text-primary"
+                          className="w-3.5 h-3.5 md:w-4 2xl:w-5 md:h-4 2xl:h-5 text-primary bg-background border-primary/20 focus:ring-primary/20 focus:ring-offset-background"
                         />
-                        <span className="font-paragraph text-sm 2xl:text-base text-foreground/80 group-hover:text-primary transition-colors">{cat.categoryName}</span>
+                        <span className="font-paragraph text-sm 2xl:text-base text-foreground/80 group-hover:text-primary transition-colors">{cat.name}</span>
                       </label>
                     ))}
                   </div>
@@ -382,20 +387,20 @@ export default function ShopPage() {
                       />
                       <span className="font-paragraph text-foreground/80">All Products</span>
                     </label>
-                    {!isLoadingCategories && categories.map((cat) => (
+                    {!isLoadingCategories && categoriesList.map((cat) => (
                       <label key={cat._id} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
-                          name="category-mobile"
-                          value={cat.slug}
-                          checked={selectedCategory === cat.slug}
+                          name="mobile-category"
+                          value={cat.slug || cat.name || ''}
+                          checked={selectedCategory === (cat.slug || cat.name)?.toLowerCase().trim()}
                           onChange={(e) => {
                             setSelectedCategory(e.target.value);
                             setSkip(0);
                           }}
-                          className="w-4 h-4 text-primary"
+                          className="w-4 h-4 text-primary bg-background border-primary/20 focus:ring-primary/20 focus:ring-offset-background"
                         />
-                        <span className="font-paragraph text-foreground/80">{cat.categoryName}</span>
+                        <span className="text-gray-600">{cat.name}</span>
                       </label>
                     ))}
                   </div>

@@ -104,7 +104,7 @@ export default function RentalBookingPage() {
     }
 
     // Build the message
-    const productUrl = `${window.location.origin}/rental/${product._id}`;
+    const productUrl = `${window.location.origin}/rental-booking/${product._id}`;
     const message = `*Rental Booking Inquiry*
 
 *Product Details:*
