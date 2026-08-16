@@ -81,38 +81,39 @@ export default function HomePage() {
 
   // OPTIMIZED: Combined fetch for all data in parallel - NO LIMIT on Best Sellers and New Arrivals
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchProducts = async () => {
       try {
-        const [productsResult, categoriesResult] = await Promise.all([
-          BaseCrudService.getAll<Products>('jewelleryproducts', {}, { limit: 200 }),
-          BaseCrudService.getAll<ShopbyCategory>('jewellerycategories', {}, { limit: 50 })
-        ]);
-
-        // Fetch ALL best sellers and new arrivals - no limit
+        const productsResult = await BaseCrudService.getAll<Products>('jewelleryproducts', {}, { limit: 200 });
         const bestSellers = productsResult.items.filter((product) => product.isBestSeller === true);
         const newArrivals = productsResult.items.filter((product) => product.newArrival === true);
 
         setBestSellerProducts(bestSellers);
-        setIsLoadingBestSellers(false);
-
         setNewArrivalProducts(newArrivals);
-        setIsLoadingNewArrivals(false);
-
-        const sortedCategories = categoriesResult.items.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-        setCategories(sortedCategories);
-        setIsLoadingCategories(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching products:', error);
         setBestSellerProducts([]);
         setNewArrivalProducts([]);
-        setCategories([]);
+      } finally {
         setIsLoadingBestSellers(false);
         setIsLoadingNewArrivals(false);
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const categoriesResult = await BaseCrudService.getAll<ShopbyCategory>('jewellerycategories', {}, { limit: 50 });
+        const sortedCategories = categoriesResult.items.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+        setCategories(sortedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      } finally {
         setIsLoadingCategories(false);
       }
     };
 
-    fetchAllData();
+    fetchProducts();
+    fetchCategories();
   }, []);
 
   const nextSlide = useCallback(() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length), [heroSlides.length]);
@@ -310,7 +311,7 @@ export default function HomePage() {
                               src={category.categoryImage}
                               alt={category.categoryName || 'Category'}
                               className="absolute inset-0 w-full h-full object-cover"
-                              loading="lazy"
+                              loading="eager"
                             />
                           ) : (
                             <div className="text-4xl md:text-5xl 2xl:text-6xl text-secondary/30">💍</div>
