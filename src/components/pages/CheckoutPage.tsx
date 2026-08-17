@@ -108,6 +108,8 @@ export default function CheckoutPage() {
       });
 
       if (redirectSession?.fullUrl) {
+        // Save checkoutId so ThankYouPage can verify payment status on return
+        sessionStorage.setItem('wix_pending_checkout_id', checkoutId);
         window.location.href = redirectSession.fullUrl;
       } else {
         throw new Error('Failed to generate redirect URL');
