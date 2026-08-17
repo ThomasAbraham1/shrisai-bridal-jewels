@@ -15,9 +15,15 @@ export default function ThankYouPage() {
   // Ref to avoid stale closure / infinite loop with actions in useEffect deps
   const actionsRef = useRef(actions);
   actionsRef.current = actions;
+  // Guard against React Strict Mode running effects twice (dev only)
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     async function verifyPayment() {
+      // Prevent React Strict Mode's double-invocation from causing a failed→success flash
+      if (hasVerified.current) return;
+      hasVerified.current = true;
+
       const checkoutId = sessionStorage.getItem('wix_pending_checkout_id');
       console.log('[ThankYouPage] checkoutId from session:', checkoutId);
 
