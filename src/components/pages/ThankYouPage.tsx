@@ -12,55 +12,49 @@ export default function ThankYouPage() {
   const navigate = useNavigate();
   const { actions } = useCart();
   const [status, setStatus] = useState<'loading' | 'success' | 'failed'>('loading');
-  // Use a ref to avoid including `actions` in useEffect deps (prevents infinite loop)
+  // Ref to avoid stale closure / infinite loop with actions in useEffect deps
   const actionsRef = useRef(actions);
   actionsRef.current = actions;
 
   useEffect(() => {
     async function verifyPayment() {
-      // Retrieve the checkoutId we saved before redirecting to Wix
       const checkoutId = sessionStorage.getItem('wix_pending_checkout_id');
       console.log('[ThankYouPage] checkoutId from session:', checkoutId);
 
+      // No checkoutId means user navigated here directly — show failed to be safe
       if (!checkoutId) {
-        // No pending checkout in session — user navigated here directly or session expired.
-        // Show success as a safe fallback (Wix's own page already confirmed the order).
-        setStatus('success');
+        console.log('[ThankYouPage] No checkoutId in session → failed/abandoned');
+        setStatus('failed');
         return;
       }
 
+      // Always clear the stored checkoutId once we start verifying
+      sessionStorage.removeItem('wix_pending_checkout_id');
+
       try {
-        // Search for an order associated with this checkout
-        const result = await (wixClient.orders as any).searchOrders({
-          search: {
-            filter: { checkoutId: { $eq: checkoutId } }
-          }
-        });
+        // Use getCheckout — if payment was completed, the checkout will have an orderId.
+        // If the user abandoned before paying, orderId will be null/undefined.
+        const checkoutData = await wixClient.checkout.getCheckout(checkoutId);
+        const orderId = (checkoutData as any)?.orderId ?? null;
+        console.log('[ThankYouPage] checkout orderId:', orderId);
 
-        const order = result?.orders?.[0] ?? result?.items?.[0] ?? null;
-        console.log('[ThankYouPage] Found order:', order?._id, 'paymentStatus:', order?.paymentStatus);
-
-        // Clear the stored checkoutId regardless of outcome
-        sessionStorage.removeItem('wix_pending_checkout_id');
-
-        if (order && (order.paymentStatus === 'PAID' || order.paymentStatus === 'PENDING')) {
+        if (orderId) {
+          // An order was created → payment went through
           setStatus('success');
           actionsRef.current.clearCart();
         } else {
+          // No order created → user abandoned the checkout before paying
           setStatus('failed');
         }
       } catch (err: any) {
-        console.warn('[ThankYouPage] Could not verify order:', err?.message);
-        // If the API call fails (permissions / network), assume success if a checkoutId was present
-        // since Wix only redirects here after the checkout flow is complete.
-        sessionStorage.removeItem('wix_pending_checkout_id');
-        setStatus('success');
-        actionsRef.current.clearCart();
+        console.warn('[ThankYouPage] getCheckout failed:', err?.message);
+        // If we can't verify, default to FAILED (safer than faking success)
+        setStatus('failed');
       }
     }
 
     verifyPayment();
-  }, []); // Empty deps — runs once on mount only
+  }, []); // runs once on mount
 
   if (status === 'loading') {
     return (
@@ -92,7 +86,7 @@ export default function ThankYouPage() {
             </div>
             <h1 className="font-heading text-4xl text-foreground mb-4">Payment Incomplete</h1>
             <p className="font-paragraph text-foreground/70 mb-8 leading-relaxed">
-              It looks like your payment was cancelled or did not go through. Your cart items are still saved — you can try again whenever you're ready.
+              It looks like your payment was not completed. Your cart items are still saved — you can try again whenever you're ready.
             </p>
             <div className="flex flex-col gap-4">
               <Button
