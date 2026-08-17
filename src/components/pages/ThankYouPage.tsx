@@ -104,10 +104,10 @@ export default function ThankYouPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/cart')}
+                onClick={() => navigate('/')}
                 className="w-full border-primary/20 text-foreground hover:bg-primary/5 font-bold uppercase tracking-wider py-4"
               >
-                Return to Cart
+                Go to Homepage
               </Button>
             </div>
           </motion.div>
