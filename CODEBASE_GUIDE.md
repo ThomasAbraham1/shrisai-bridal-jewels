@@ -271,7 +271,7 @@ Look at `src/lib/pricing.ts`. The functions `getDisplayPrice()` and `hasValidDis
 
 2. **`wixClient` is a singleton** — It is initialized once and shared across the entire app. Never re-initialize it inside a component.
 
-3. **Category filtering uses `categoryMap.json`** — Products are mapped to categories via a SKU→category JSON file, NOT by Wix collections. If a new product doesn't appear under the right category filter, check whether its SKU exists in `src/integrations/categoryMap.json`.
+3. **Categories are 100% dynamic from Wix Store** — Product categories are fetched directly from Wix Categories API using product `collectionIds`. Whenever you create a category in Wix Studio or assign a product to a category, it will immediately work and filter on the Shop page without modifying code or JSON files.
 
 4. **Ribbon limits** — Wix V1 returns only one ribbon string per product. Multiple carousels (Best Sellers + New Arrivals) are supported by setting comma-separated values in that one ribbon field (e.g. `"Best Seller, New Arrival"`).
 

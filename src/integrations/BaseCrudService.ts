@@ -27,7 +27,35 @@ function mapWixCategory(c: any): ShopbyCategory {
   };
 }
 
-// Remove HARDCODED_CATEGORIES
+// In-memory cache for dynamic category lookup from Wix
+let cachedCategoryMap: Record<string, string> | null = null;
+let lastCategoryFetch = 0;
+
+async function getCategoryLookup(): Promise<Record<string, string>> {
+  const now = Date.now();
+  if (cachedCategoryMap && (now - lastCategoryFetch < 60000)) {
+    return cachedCategoryMap;
+  }
+  try {
+    const result = await wixClient.categories.queryCategories({
+      treeReference: { appNamespace: '@wix/stores' }
+    }).eq('visible', true).find();
+    
+    const map: Record<string, string> = {};
+    result.items.forEach(c => {
+      if (c._id && c.name) {
+        map[c._id] = c.name;
+      }
+    });
+    cachedCategoryMap = map;
+    lastCategoryFetch = now;
+    return map;
+  } catch (error) {
+    console.warn('Failed to load dynamic category map from Wix:', error);
+    return cachedCategoryMap || {};
+  }
+}
+
 // ─── Map a Wix Stores product to the old Products entity shape ───────────────
 function mapWixProduct(p: any, collectionMap: Record<string, string> = {}): Products {
   const media = p.media?.items ?? [];
@@ -38,9 +66,14 @@ function mapWixProduct(p: any, collectionMap: Record<string, string> = {}): Prod
   const priceDiscounted = p.price?.discountedPrice ?? priceOriginal;
   const hasDiscount = priceDiscounted < priceOriginal;
 
-  // Since Wix Headless Stores V3 SDK doesn't expose collection names dynamically yet,
-  // we use the exact mapping from the original Wix CMS export based on the SKU!
-  const categoryNames = (p.sku && categoryMap[p.sku as keyof typeof categoryMap]) ? categoryMap[p.sku as keyof typeof categoryMap] : (p.name ?? '');
+  // Resolve category name(s) dynamically from Wix Store category IDs (collectionIds)
+  const matchedCategories = (p.collectionIds || [])
+    .map((id: string) => collectionMap[id])
+    .filter(Boolean);
+
+  const categoryNames = matchedCategories.length > 0
+    ? matchedCategories.join(', ')
+    : ((p.sku && (categoryMap as any)[p.sku]) ? (categoryMap as any)[p.sku] : (p.name ?? ''));
 
   return {
     _id: p._id ?? '',
@@ -86,51 +119,24 @@ export const BaseCrudService = {
     options: { limit?: number; skip?: number } = {}
   ): Promise<{ items: T[]; hasNext: boolean }> => {
     if (collectionId === 'jewellerycategories') {
-      const items = [
-        {
-          _id: "afa487cd-c7b1-4f44-b6a1-3f572a79c747",
-          categoryName: "Neckpiece",
-          categoryImage: "https://static.wixstatic.com/media/b9ec8c_f90d908421184b2fa9199bfdaff85162~mv2.png",
-          slug: "neckpiece",
-          displayOrder: 1,
-        },
-        {
-          _id: "1df5b053-c2c2-468a-b8c4-1ee7ae6db5ab",
-          categoryName: "Earrings",
-          categoryImage: "https://static.wixstatic.com/media/b9ec8c_6fa4292e82fc439e9ae319fed6a2932c~mv2.png",
-          slug: "earrings",
-          displayOrder: 2,
-        },
-        {
-          _id: "3523ab16-e577-4826-90fd-2a1c95479f3a",
-          categoryName: "Bangles",
-          categoryImage: "https://static.wixstatic.com/media/b9ec8c_9b54d3ed68904e6d8b9ca068129c4708~mv2.png",
-          slug: "bangles",
-          displayOrder: 3,
-        },
-        {
-          _id: "03c5ab36-695c-41a5-9f74-63e4e917a71c",
-          categoryName: "Maatal",
-          categoryImage: "https://static.wixstatic.com/media/b9ec8c_5b8770d16c5c4b7fadab8a8e8a064f1e~mv2.png",
-          slug: "maatal",
-          displayOrder: 4,
-        },
-        {
-          _id: "0a06fc0d-72d1-4f0b-a3f0-56dfc742a687",
-          categoryName: "Haaram",
-          categoryImage: "https://static.wixstatic.com/media/b9ec8c_902402768f5b450ba11605ae629766ba~mv2.png",
-          slug: "haaram",
-          displayOrder: 5,
-        },
-        {
-          _id: "e8675833-bbe4-4289-8a4f-3487f498ca18",
-          categoryName: "Chutti",
-          categoryImage: "https://static.wixstatic.com/media/b9ec8c_d986cd18b0f84281b88e2cc750af9660~mv2.png",
-          slug: "chutti",
-          displayOrder: 6,
-        },
-      ];
-      return { items: items as unknown as T[], hasNext: false };
+      try {
+        const result = await wixClient.categories.queryCategories({
+          treeReference: { appNamespace: '@wix/stores' }
+        }).eq('visible', true).find();
+        
+        const sortedItems = [...result.items].sort((a, b) => (a.parentCategory?.index ?? 0) - (b.parentCategory?.index ?? 0));
+        const items = sortedItems.map((c, index) => ({
+          _id: c._id ?? '',
+          categoryName: c.name ?? '',
+          categoryImage: parseWixImageUrl(c.media?.mainMedia?.image?.url ?? ''),
+          slug: c.slug ?? '',
+          displayOrder: index + 1,
+        })) as unknown as T[];
+        return { items, hasNext: false };
+      } catch (e) {
+        console.error('Failed to query categories in BaseCrudService:', e);
+        return { items: [], hasNext: false };
+      }
     }
     if (collectionId === 'rentbycategory') {
       const res = await wixClient.items.query('rentbycategory').find();
@@ -157,12 +163,13 @@ export const BaseCrudService = {
     }
 
     if (collectionId === 'jewelleryproducts') {
+      const categoryLookup = await getCategoryLookup();
       const limit = options.limit ?? 200;
       let query = wixClient.products.queryProducts();
       if (limit) query = query.limit(limit > 100 ? 100 : limit);
       
       const result = await query.find();
-      const items = result.items.map(p => mapWixProduct(p, {})) as unknown as T[];
+      const items = result.items.map(p => mapWixProduct(p, categoryLookup)) as unknown as T[];
       return { items, hasNext: result.hasNext() };
     }
 
@@ -181,9 +188,10 @@ export const BaseCrudService = {
    */
   getById: async <T>(collectionId: string, id: string): Promise<T | null> => {
     if (collectionId === 'jewelleryproducts') {
+      const categoryLookup = await getCategoryLookup();
       const result = await wixClient.products.getProduct(id);
       const product = result?.product || result;
-      return mapWixProduct(product, {}) as unknown as T;
+      return mapWixProduct(product, categoryLookup) as unknown as T;
     }
     if (collectionId === 'rentalproducts') {
       const res = await wixClient.items.query('rentalproducts').eq('_id', id).find();
