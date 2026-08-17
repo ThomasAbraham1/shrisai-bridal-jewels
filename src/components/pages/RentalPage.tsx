@@ -188,8 +188,8 @@ export default function RentalPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.05 }}
-                    className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
-                    onClick={() => navigate(`/rental-booking/${product._id}`)}
+                    className={`group bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 ${product.availabilityStatus !== false ? 'hover:shadow-2xl hover:-translate-y-2 cursor-pointer' : 'opacity-70 cursor-not-allowed'}`}
+                    onClick={() => product.availabilityStatus !== false && navigate(`/rental-booking/${product._id}`)}
                   >
                     {/* Product Image */}
                     <div className="relative aspect-[3/4] overflow-hidden bg-background">
@@ -201,10 +201,15 @@ export default function RentalPage() {
                       />
                       
                       {/* Rental Badge */}
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-primary text-white px-3 py-1 rounded-full text-xs font-paragraph uppercase tracking-wider">
+                      <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
+                        <span className="bg-primary text-white px-3 py-1 rounded-full text-xs font-paragraph uppercase tracking-wider shadow-sm">
                           For Rent
                         </span>
+                        {product.availabilityStatus === false && (
+                          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-paragraph uppercase tracking-wider shadow-sm">
+                            Out of Stock
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -230,13 +235,22 @@ export default function RentalPage() {
                         </div>
                       </div>
 
-                      <Link to={`/rental-booking/${product._id}`} className="w-full">
+                      {product.availabilityStatus !== false ? (
+                        <Link to={`/rental-booking/${product._id}`} className="w-full" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider"
+                          >
+                            View & Book
+                          </Button>
+                        </Link>
+                      ) : (
                         <Button
-                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider"
+                          disabled
+                          className="w-full bg-gray-300 text-gray-500 font-bold uppercase tracking-wider cursor-not-allowed"
                         >
-                          View & Book
+                          Out of Stock
                         </Button>
-                      </Link>
+                      )}
                     </div>
                   </motion.div>
                 ))}

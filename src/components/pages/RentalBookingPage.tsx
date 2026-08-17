@@ -239,6 +239,17 @@ ${formData.additionalNotes || 'None'}`;
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="font-heading text-3xl text-foreground mb-8">Rental Booking Form</h2>
 
+              {product.availabilityStatus === false ? (
+                <div className="text-center py-12 px-6 bg-red-50 rounded-xl border border-red-100">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">⚠️</span>
+                  </div>
+                  <h3 className="text-xl font-heading text-red-600 mb-2">Out of Stock</h3>
+                  <p className="text-foreground/70 font-paragraph">
+                    This item is currently out of stock and unavailable for new rental bookings at the moment.
+                  </p>
+                </div>
+              ) : (
               <form className="space-y-6">
                 {/* Full Name */}
                 <div>
@@ -472,6 +483,7 @@ ${formData.additionalNotes || 'None'}`;
                   By clicking "Book on WhatsApp", you'll be connected to our team to complete your rental booking.
                 </p>
               </form>
+              )}
             </div>
           </motion.div>
         </div>

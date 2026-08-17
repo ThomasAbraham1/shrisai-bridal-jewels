@@ -51,11 +51,19 @@ function mapWixProduct(p: any, collectionMap: Record<string, string> = {}): Prod
     mrp: priceOriginal,
     itemPrice: priceOriginal,
     enableDiscount: hasDiscount,
-    isBestSeller: p.ribbons?.some((r: any) => r.text?.toLowerCase().includes('best seller')) || false,
-    newArrival: p.ribbons?.some((r: any) => r.text?.toLowerCase().includes('new')) || false,
+    isBestSeller: [p.ribbon, ...(p.ribbons ?? []), ...(p.additionalRibbons ?? [])].some((r: any) => {
+      if (!r) return false;
+      const text = (typeof r === 'string' ? r : (r.text || r.name || '')).toLowerCase();
+      return text.includes('best seller') || text.includes('bestseller');
+    }),
+    newArrival: [p.ribbon, ...(p.ribbons ?? []), ...(p.additionalRibbons ?? [])].some((r: any) => {
+      if (!r) return false;
+      const text = (typeof r === 'string' ? r : (r.text || r.name || '')).toLowerCase();
+      return text.includes('new');
+    }),
     category: categoryNames,
     skuCode: p.sku ?? '',
-    stockQuantity: p.stock?.quantity ?? 0,
+    stockQuantity: p.stock?.quantity ?? (p.stock?.inStock ? 999 : 0),
     enableInventoryTracking: p.stock?.trackInventory ?? false,
     productGallery: gallery[0] ?? '',
     productGallery2: gallery[1] ?? '',
