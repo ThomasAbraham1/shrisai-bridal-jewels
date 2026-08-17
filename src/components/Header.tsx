@@ -70,10 +70,10 @@ export default function Header() {
 
         {/* Main Navigation */}
         <nav
-          className={`transition-all duration-300 bg-primary pointer-events-auto`}
+          className={`transition-all duration-300 bg-secondary pointer-events-auto`}
         >
           <div className="w-full max-w-[1600px] mx-auto">
-            <div className="flex items-center justify-between h-[72px] md:h-[80px] lg:h-[80px] 2xl:h-[90px] px-0 lg:px-12 2xl:px-16 gap-0 lg:gap-6 2xl:gap-6 bg-secondary">
+            <div className="flex items-center justify-between h-[72px] md:h-[80px] lg:h-[80px] 2xl:h-[90px] px-0 lg:px-12 2xl:px-16 gap-0 lg:gap-6 2xl:gap-6">
               {/* Desktop: Left Logo */}
               <Link to="/" className="hidden lg:flex items-center flex-shrink-0 min-w-0 bg-transparent overflow-visible">
                 <img
